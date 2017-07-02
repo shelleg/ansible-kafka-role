@@ -1,0 +1,20 @@
+---
+kafka_version: "0.10.1.1"
+kafka_scala_version: "2.11"
+kafka_mirror: http://apache.mirrors.tds.net/kafka
+kafka_url: "{{ kafka_mirror }}/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+kafka_bin_tmp: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tar.gz"
+kafka_sig_url: "https://dist.apache.org/repos/dist/release/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz.asc"
+kafka_keys_url: "http://kafka.apache.org/KEYS"
+kafka_keys_tmp: "/tmp/kafka_KEYS"
+kafka_sig_tmp: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tar.gz.asc"
+kafka_log_dir: /kafka/data
+zookeeper_data_dir: /zookeeper
+kafka_base_dir: /usr/local/kafka
+kafka_base_config_dir: "{{ kafka_base_dir }}/config"
+zookeeper_config_file_path: "{{ kafka_base_config_dir }}/zookeeper.properties"
+kafka_log4j_config_file_path: "{{ kafka_base_config_dir }}/log4j.properties"
+kafka_server_config_file_path: "{{ kafka_base_config_dir }}/server.properties"
+kafka_user: kafkauser
+kafka_group: kafkagroup
+kafka_startup_script_template: "etc/init.d/kafka"

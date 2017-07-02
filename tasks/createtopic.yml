@@ -1,0 +1,22 @@
+---
+- name: check if topic exists
+  shell: "./kafka-topics.sh --zookeeper  {{ inventory_hostname }}:2181 --list | grep Example-Topic"
+  args:
+    chdir: "{{ kafka_base_dir }}/bin"
+  run_once: true
+  register: topicexists
+  ignore_errors: yes
+- name: create kafka-topic in case of cluster
+  shell: "./kafka-topics.sh --create --zookeeper  {% for host in groups['kafkas'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %} --replication-factor 2 --partitions 100 --topic Example-Topic"
+  args:
+    chdir: "{{ kafka_base_dir }}/bin"
+  run_once: true
+  become_user: kafkauser
+  when: groups['kafkas']|length > 1 and topicexists.stdout == ""
+- name: create kafka-topic in case of single-server
+  shell: "./kafka-topics.sh --create --zookeeper  {{ inventory_hostname }}:2181 --replication-factor 1 --partitions 100 --topic Example-Topic"
+  args:
+    chdir: "{{ kafka_base_dir }}/bin"
+  run_once: true
+  become_user: kafkauser
+  when: groups['kafkas']|length == 1 and topicexists.stdout == ""

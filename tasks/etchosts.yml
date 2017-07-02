@@ -1,0 +1,11 @@
+---
+- name: set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+  become: yes
+
+- name: Build hosts file
+  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_host }} {{item}}" state=present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.kafkas }}"
+  become: yes

@@ -1,0 +1,17 @@
+---
+- name: Startup script for Kafka
+  template:
+    src: "{{ kafka_startup_script_template }}"
+    dest: "/{{ kafka_startup_script_template }}"
+    owner: root
+    group: root
+    mode: 0755
+  become: yes
+
+- name: Configure kafka service to start on boot
+  shell: "/sbin/chkconfig --level 345 kafka on"
+  become: yes  
+
+- name: Start service kafka
+  shell: "/sbin/service kafka restart"
+  become: yes  

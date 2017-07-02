@@ -1,0 +1,17 @@
+galaxy_info:
+  author: Gilad Judes
+  description: Kafka Cluster setup on AWS Linux
+  license: BSD
+
+  min_ansible_version: 2.0.3
+
+  platforms:
+  - name: Amazon  
+    versions:
+    - 2016.09
+
+  galaxy_tags:
+    - kafka 
+    - cluster
+
+dependencies: []

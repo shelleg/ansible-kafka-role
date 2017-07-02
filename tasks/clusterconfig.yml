@@ -1,0 +1,101 @@
+---
+- name: Ensure myid is set in {{ zookeeper_data_dir }}/myid
+  template:
+    src: myid
+    dest: "{{ zookeeper_data_dir }}/myid"
+  become: yes
+
+- name: Verify Zookeeper dataDir
+  lineinfile:
+    path: "{{ zookeeper_config_file_path }}" 
+    regexp: '^dataDir'
+    line: 'dataDir=/zookeeper' 
+  become: yes
+
+- name: Verify initLimit
+  lineinfile:
+    path: "{{ zookeeper_config_file_path }}" 
+    line: 'initLimit=5' 
+  become: yes
+- name: Verify syncLimit
+  lineinfile:
+    path: "{{ zookeeper_config_file_path }}" 
+    line: 'syncLimit=2' 
+  become: yes
+
+- name: Add servers in cluster list to zookeeper config 
+  lineinfile: 
+    path: "{{ zookeeper_config_file_path }}" 
+    line: "server.{{ hostvars[item].zk_id }}={{item}}:2888:3888"
+  when: hostvars[item].zk_id is defined
+  with_items: "{{ groups.kafkas }}"
+  become: yes
+
+- name: Add lines to log file config  
+  lineinfile: 
+    path: "{{ kafka_log4j_config_file_path }}"
+    line: "{{item}}"
+  with_items:
+    - "log4j.appender.zk=org.apache.log4j.DailyRollingFileAppender"
+    - "log4j.appender.zk.DatePattern='.'yyyy-MM-dd-HH"
+    - "log4j.appender.zk.File=${kafka.logs.dir}/zk.log"
+    - "log4j.appender.zk.layout=org.apache.log4j.PatternLayout"
+    - "log4j.appender.zk.layout.ConversionPattern=[%d] %p %m (%c)%n" 
+    - "log4j.logger.org.apache.zookeeper=INFO, zk" 
+  become: yes
+
+- name: Set broker_id on each server
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^broker.id"
+    line: "broker.id={{ hostvars[inventory_hostname]['zk_id'] }}"
+  become: yes
+
+- name: Set advertised.listeners on each server
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^advertised.listeners"
+    line: "advertised.listeners=PLAINTEXT://{{ hostvars[inventory_hostname]['ansible_host'] }}:9092"
+  become: yes
+   
+- name: Set log.dirs in server.properties
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^log.dirs"
+    line: "log.dirs=/kafka/data"
+  become: yes
+   
+- name: Remove default zookeeper.connect in server.properties
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    state: absent
+    regexp: "^zookeeper.connect=localhost:2181"
+  become: yes
+
+- name: Set zookeeper.connect in server.properties
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^zookeeper.connect"
+    line: "zookeeper.connect={% for host in groups['kafkas'] %}{{ host }}:2181{% if not loop.last %},{% endif %}{% endfor %}"
+  become: yes
+  
+- name: Set log.message.timestamp.type in server.properties
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^log.message.timestamp.type"
+    line: "log.message.timestamp.type=LogAppendTime"
+  become: yes
+   
+- name: Set log.retention.hours in server.properties
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^log.retention.hours"
+    line: "log.retention.hours=3"
+  become: yes
+   
+- name: Set num.partitions in server.properties
+  lineinfile:
+    path: "{{ kafka_server_config_file_path }}"
+    regexp: "^num.partitions"
+    line: "num.partitions=100"
+  become: yes

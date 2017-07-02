@@ -1,0 +1,24 @@
+---
+- name: Create linux groups on Kafka servers
+  group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - kafka
+    - kafkagroup
+  become: yes
+
+- name: Create kafkaadmin on Kafka servers
+  user: 
+    name: kafkaadmin
+    group: root
+    groups: kafka
+    state: present
+  become: yes
+
+- name: Create kafkauser on Kafka servers
+  user: 
+    name: kafkauser
+    group: kafkagroup
+    state: present
+  become: yes

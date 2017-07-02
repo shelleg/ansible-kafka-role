@@ -1,0 +1,13 @@
+---
+- name: "start kafka"
+  service: name=kafka state=started
+  become: yes
+
+- name: "stop kafka"
+  service: name=kafka state=stopped
+  become: yes
+
+- name: "restart kafka"
+  service: name=kafka state=restarted
+  become: yes
+

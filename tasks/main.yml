@@ -1,0 +1,16 @@
+---
+- name: Setup Hosts file
+  include: etchosts.yml
+- name: Setup Kafka Users
+  include: kafkausers.yml
+- name: Install Kafka
+  include: installkafka.yml
+- name: Cluster config
+  include: clusterconfig.yml
+- name: Start cluster
+  include: startcluster.yml
+- name: wait for 5 seconds
+  pause:
+    seconds: 5
+- name: Add topic if first time install
+  include: createtopic.yml
